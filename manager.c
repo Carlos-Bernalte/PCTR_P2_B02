@@ -214,7 +214,7 @@ void wait_processes() {
       if (pid == g_process_table[i].pid) {
 	/* Update the 'process table' */
         g_process_table[i].pid = 0;           
-	n_processes--; 
+	      n_processes--; 
 	/* Child process found */
         break; 
       }
@@ -224,9 +224,7 @@ void wait_processes() {
 
 /******************** Semaphores and shared memory management ********************/
 
-void create_shm_segments(int *shm_data, int *shm_task,
-			 struct TData_t **p_data, struct TTask_t **p_task, 
-			 int numerator, int denominator, int n_prime_numbers) {
+void create_shm_segments(int *shm_data, int *shm_task,struct TData_t **p_data, struct TTask_t **p_task, int numerator, int denominator, int n_prime_numbers) {
   int i;
 
   /* Create and initialize shared memory segments */
@@ -249,9 +247,9 @@ void create_shm_segments(int *shm_data, int *shm_task,
 
 void create_sems(sem_t **p_sem_task_ready, sem_t **p_sem_task_read, sem_t **p_sem_task_processed) {  
   /* Create and initialize semaphores */
-  *p_sem_task_ready = create_semaphore(SEM_TASK_READY,         /* INIT SEM VALUE */); 
-  *p_sem_task_read = create_semaphore(SEM_TASK_READ,           /* INIT SEM VALUE */);
-  *p_sem_task_processed = create_semaphore(SEM_TASK_PROCESSED, /* INIT SEM VALUE */);
+  *p_sem_task_ready = create_semaphore(SEM_TASK_READY,0); 
+  *p_sem_task_read = create_semaphore(SEM_TASK_READ, 0);
+  *p_sem_task_processed = create_semaphore(SEM_TASK_PROCESSED, 0);
 }
 
 void close_shared_memory_segments(int shm_data, int shm_task) {
@@ -275,9 +273,11 @@ void notify_tasks(sem_t *sem_task_ready, sem_t *sem_task_read, struct TTask_t *t
 }
 
 void wait_tasks_termination(sem_t *sem_task_processed, int n_tasks) {
-
-  /* INCLUDE REMAINING CODE HERE */
-  
+  int n_tasks_processed = 0;
+  while (n_tasks_processed < n_tasks) {
+    wait_semaphore(sem_task_processed);
+    n_tasks_processed++;
+  }
 }
 
 /******************** Auxiliar functions ********************/

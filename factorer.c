@@ -88,7 +88,32 @@ void get_sems(sem_t **p_sem_task_ready, sem_t **p_sem_task_read, sem_t **p_sem_t
 
 /******************** Task management ********************/
 
-/* INCLUDE REMAINING CODE HERE */
+void get_and_process_task(sem_t *sem_task_ready, sem_t *sem_task_read, struct TData_t *data, const struct TTask_t * task) {
+  struct TTask_t my_task;
+  int numerator_exponent, denominator_exponent;
+  /* Task notification through rendezvous */
+  wait_semaphore(sem_task_ready);
+  memcpy(&my_task, task, sizeof(struct TTask_t));
+  signal_semaphore(sem_task_read);
+  /* Compute exponents */
+  numerator_exponent = how_many_times_divisible(data->numerator, my_task.prime_number);
+  data->numerator_exponents[my_task.prime_number_position] = numerator_exponent;
+  denominator_exponent = how_many_times_divisible(data->denominator, my_task.prime_number);
+  data->denominator_exponents[my_task.prime_number_position] = denominator_exponent;
+
+  /* Simplify potencies */
+  if (data->numerator_exponents[my_task.prime_number_position] >= data->denominator_exponents[my_task.prime_number_position]) {
+    data->numerator_exponents[my_task.prime_number_position]-= data->denominator_exponents[my_task.prime_number_position];
+    data->denominator_exponents[my_task.prime_number_position] = 0;
+  }
+  else {
+    data->denominator_exponents[my_task.prime_number_position] -= data->numerator_exponents[my_task.prime_number_position];
+    data->numerator_exponents[my_task.prime_number_position] = 0;
+  }
+}
+void notify_task_completed(sem_t *sem_task_processed) {
+  signal_semaphore(sem_task_processed);
+}
 
 /******************** Auxiliar functions ********************/
 
